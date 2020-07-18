@@ -1,0 +1,98 @@
+<form id="pagerForm" method="post" action="w_list.html">
+	<input type="hidden" name="pageNum" value="1" />
+	<input type="hidden" name="numPerPage" value="${model.numPerPage}" />
+	<input type="hidden" name="orderField" value="${param.orderField}" />
+	<input type="hidden" name="orderDirection" value="${param.orderDirection}" />
+</form>
+<div class="pageHeader">
+	<form rel="pagerForm" onsubmit="return navTabSearch(this);" action="/agent/listagent" method="post">
+		<div class="searchBar">
+			<ul class="searchContent">
+				<li>
+					<label>Client名称：</label>
+					<input type="text" name="searchonlyid" value="{{.searchonlyid}}"/>
+				</li>
+				<li>
+					<label>分组：</label>
+					<input type="text" name="searchgroupname" value="{{.searchgroupname}}"/>
+				</li>
+			</ul>
+			<div class="subBar">
+				<ul>
+					<li><div class="buttonActive"><div class="buttonContent"><button type="submit">检索</button></div></div></li>
+				</ul>
+			</div>
+		</div>
+	</form>
+</div>
+<div class="pageContent">
+	<table class="list" width="100%">
+		<thead>
+			<tr>
+				<th width="30%" align="left">Client名称</th>
+				<th width="15%" align="left">代理地址</th>
+				<th width="10%" align="left">状态</th>
+				<th width="8%" align="left">进程ID</th>
+				<th width="10%" align="left">心跳时间</th>
+				<th width="12%" align="left">最近调度</th>
+				<th align="left">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{range .AgentList}}
+			<tr target="sid_user" rel="1" style="height: 60px;">
+				<td style="word-break: break-all">
+					{{.OnlyId}}
+					<br>
+					分组：{{.GroupName}}
+				</td>
+				<td>{{.ProxyAddr}}</td>
+				<td>
+					{{if IsEqual .Disabled 0}}
+						可用
+					{{else}}
+						<s style="color: grey">禁用</s>
+					{{end}}
+					&nbsp;
+					{{if IsEqual .IsActive 1}}
+						存活
+					{{else}}
+						<s style="color: grey">存活</s>
+					{{end}}
+					&nbsp;
+					{{if IsEqual .IsBusy 1}}
+						<s style="color: grey">空闲</s>
+					{{else}}
+						空闲
+					{{end}}
+				</td>
+				<td>{{.ProcessId}}</td>
+				<td>{{.ReportTime}}</td>
+				<td>{{.LastUseTime}}</td>
+				<td>
+					{{if IsEqual .Disabled 0}}
+						<a href="/agent/disableagent?id={{.Id}}&disable=1" callback="onDisableItem" target="ajaxTodo" title="确认'禁用'该条目吗?" ><span>禁用</span></a>
+					{{else}}
+						<a href="/agent/disableagent?id={{.Id}}&disable=0" callback="onDisableItem" target="ajaxTodo" title="确认'启用'该条目吗?" ><span>启用</span></a>
+					{{end}}
+					&nbsp;
+					<a href="/agent/editagent?id={{.Id}}" target="dialog" width="600"  mask="true" height="200" ><span>设置分组</span></a>
+					&nbsp;
+					<a href="/agent/deleteagent?id={{.Id}}" callback="onDeleteItem" target="ajaxTodo" title="确认删除该条目:{{.OnlyId}} 吗?" ><span>删除</span></a>
+				</td>
+			</tr>
+		{{end}}
+		</tbody>
+	</table>
+</div>
+<script language="JavaScript">
+	function onDeleteItem(data) {
+		navTab.reload("",{},"1");
+	}
+	function onDisableItem(data) {
+		navTab.reload("",{},"1");
+	}
+	function onEditComplete() {
+
+	}
+</script>

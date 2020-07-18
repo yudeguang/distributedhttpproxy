@@ -1,0 +1,64 @@
+<script lang="javascript">
+function onClientSend(){
+	var sendText = $("#sendcontent").val();
+	var sendType = $("#sendtype").val();
+	if(sendText == ""){
+		alertMsg.error("发送数据不能为空");
+		return;
+	}
+	$("#replycontent").val("");
+	$.ajax({
+        type:"POST",
+        url:"/agent/checkproxyurl?time="+new Date(),
+		data: $('#formtestrequest').serialize(),
+		dataType:"json",
+        success:function (data) {
+			if(data.Status==1){
+				$("#replycontent").val(JSON.stringify(data,null,"\t"));
+				alertMsg.info("处理成功,已返回数据");
+			}else{
+				alertMsg.error("处理失败:"+data.Data);
+			}
+        },
+		error:function(data){
+			alertMsg.error("发送失败:"+JSON.stringify(data,null,"\t"));	
+		}
+    });
+	return;
+}
+</script>
+<div class="pageContent">
+	<div class="panelBar">
+		<ul class="toolBar">
+		</ul>
+	</div>
+	<form id="formtestrequest">
+	<table  width="100%">
+		<tr style="height: 40px;">
+			<td width="100px" align="right">请求URL：</td>
+			<td>
+				<input type="text" name="proxyurl" size="20" style="width: 500px" value="http://www.17vin.com:80">
+			</td>
+		</tr>
+		<tr style="height: 40px;">
+			<td width="100px" align="right">分组：</td>
+			<td>
+				<input type="text" name="proxygroup" size="20" style="width: 500px" value="all">
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp</td>
+			<td>
+				<input type="button" value="发 送 请 求" onclick="onClientSend()">
+			</td>
+		</tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr>
+			<td align="right" valign="top">返回数据：</td>
+			<td>
+				<textarea id="replycontent" cols="100" rows="15"></textarea>
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

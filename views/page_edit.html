@@ -1,0 +1,47 @@
+<script language="JavaScript">
+	function saveGroupName(){
+		$.ajax({
+			type: "POST",
+			url:"/agent/saveagentconfig?"+new Date(),
+			data:$('#fromsavegroupname').serialize(),// 你的formid
+			dataType:'json',
+			success: function(data) {
+				if(data.Status == 1){
+					alertMsg.correct("保存成功");
+					navTab.reload("",{},"1");
+					$.pdialog.closeCurrent();
+				}else{
+					alertMsg.error(data.Data);
+				}
+			}
+		});
+	}
+</script>
+<div class="pageContent">
+	<form id="fromsavegroupname" name="fromsavegroupname" method="post">
+		<input type="hidden"  id="id" name="id" value="{{.id}}">
+		<div class="pageFormContent" layoutH="56">
+			<p>
+				<label>Id：</label>
+				<label>{{.id}}</label>
+			</p>
+			<p>
+				<label>OnlyId：</label>
+				<label>{{.onlyid}}</label>
+			</p>
+			<p>
+				<label>分组名：</label>
+				<input id="groupname" name="groupname" type="text" size="30" value="{{.groupname}}"/>
+			</p>
+		</div>
+		<div class="formBar">
+			<ul>
+				<!--<li><a class="buttonActive" href="javascript:;"><span>保存</span></a></li>-->
+				<li><div class="button"><div class="buttonContent"><button type="button" onclick="saveGroupName()">保存</button></div></div></li>
+				<li>
+					<div class="button"><div class="buttonContent"><button type="button" class="close">取消</button></div></div>
+				</li>
+			</ul>
+		</div>
+	</form>
+</div>

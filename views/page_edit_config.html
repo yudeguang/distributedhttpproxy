@@ -1,0 +1,115 @@
+<script language="JavaScript">
+	function resetIsValid() {
+		var lstIsValid = $("select[id='IsValid']");
+		var lstTrHide = $("tr[id='TRHide']");
+		for(var i=0;i<lstIsValid.length;i++){
+			var selVal = $(lstIsValid[i]).val();
+			if(selVal == 1){
+				$(lstTrHide[i]).show()
+			}else{
+				$(lstTrHide[i]).hide();
+			}
+		}
+	}
+	function onClickSave(){
+		$.ajax({
+			type: "POST",
+			url:"/agent/saveconfig?"+new Date(),
+			data:$('#myform').serialize(),// 你的formid
+			dataType:'json',
+			success: function(data) {
+				if(data.Status == 1){
+					alertMsg.correct("保存成功");
+					navTab.reload("",{},"1");
+					$.pdialog.closeCurrent();
+				}else{
+					alertMsg.error(data.Data);
+				}
+			}
+		});
+	}
+	$(document).ready(function(){
+		resetIsValid();
+	})
+
+</script>
+<div class="pageContent">
+	<form method="post" id="myform" action="#">
+		<div layoutH="56">
+			<input type="hidden" name="Id" id="Id" value="{{.id}}">
+			<table width="100%" border="0">
+				<tr><td colspan="2"><hr/></td></tr>
+				<tr style="height: 25px;">
+					<td style="width: 150px" align="right">
+						OnlyId：
+					</td>
+					<td>{{.record.OnlyId}}&nbsp;&nbsp;(Id:{{.id}})</td>
+				</tr>
+				<tr style="height: 25px">
+					<td align="right">
+						别名：
+					</td>
+					<td>
+						<input type="text" size="20" value="{{.record.ChsName}}" id="ChsName" name="ChsName"  style="height: 20px">
+					</td>
+				</tr>
+				<tr style="height: 25px">
+					<td style="height: 25px" align="right">
+						优先级：
+					</td>
+					<td>
+						<select name="Priority" id="Priority"  style="height: 20px">
+							{{range .prioritylist}}
+								<option value="{{.}}" {{if IsEqual . $.record.Priority}}selected{{end}}>{{.}}</option>
+							{{end}}
+						</select>
+						数值越大越容易被调度到
+					</td>
+				</tr>
+			</table>
+			{{range .modules}}
+			<table width="100%" border="0">
+				<tr><td colspan="2"><hr/></td></tr>
+				<tr style="height: 25px">
+					<td style="width: 150px;height: 25px" align="right"><b>{{.Name}}：</b></td>
+					<td>
+						<input type="hidden" name="ModuleName" id="ModuleName" value="{{.Name}}">
+						<input type="hidden" name="ModuleId" id="ModuleId" value="{{.Id}}">
+						<select name="IsValid" id="IsValid" ss="HELL OWLD" style="height: 20px" onchange="resetIsValid()">
+							<option value="0">停 用</option>
+							<option value="1" {{if IsEqual .IsValid "1"}}selected{{end}}>启 用</option>
+						</select>
+					</td>
+				</tr>
+				<tr style="height: 25px" id="TRHide">
+					<td style="width: 150px;">&nbsp;</td>
+					<td>
+						<table width="100%">
+							<tr><td colspan="2"><hr/></td></tr>
+							<tr style="height: 25px">
+								<td align="right" style="width: 100px">最长执行时间：</td>
+								<td><input type="text" id="MaxSecond" name="MaxSecond" value="{{.Timeout}}" size="3">&nbsp;秒</td>
+							</tr>
+							<tr style="height: 25px">
+								<td align="right">静态参数：</td>
+								<td>
+									<textarea rows="4" cols="60" id="StaticVar" name="StaticVar">{{.StaticVar}}</textarea>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			{{end}}
+		</div>
+		<div class="formBar">
+			<ul>
+				<!--<li><a class="buttonActive" href="javascript:;"><span>保存</span></a></li>-->
+				<li><div class="buttonActive"><div class="buttonContent"><button type="button" onclick="onClickSave()">保存</button></div></div></li>
+				<li>
+					<div class="button"><div class="buttonContent"><button type="button" class="close">取消</button></div></div>
+				</li>
+			</ul>
+		</div>
+	</form>
+</div>
