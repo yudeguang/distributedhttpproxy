@@ -13,7 +13,7 @@ import (
 
 var pDBHelper = &clsDBHelper{}
 
-func ReplaceSQLChar(sour string) string {
+func replaceSQLChar(sour string) string {
 	sour = strings.Replace(sour, "'", "''", -1)
 	sour = strings.Replace(sour, "\\", "\\\\", -1)
 	return sour
@@ -42,7 +42,7 @@ var lstSqlText = []string{
 }
 
 //定义AgentList表结构
-type TagAgentInfoRecord struct {
+type tagAgentInfoRecord struct {
 	Id          int
 	OnlyId      string
 	ProxyAddr   string
@@ -138,7 +138,7 @@ func (this *clsDBHelper) UpdateAgentRecord(switchData *agentcomm.TagSwitchData) 
 	var sqlText = ""
 	if isInsert { //没有记录,插入
 		sqlText = fmt.Sprintf("INSERT INTO AgentList(OnlyId,ProxyAddr,ProcessId,ReportTime,IsActive,LastUseTime) VALUES ('%s','%s','%s','%s',1,'%s')",
-			ReplaceSQLChar(switchData.OnlyId),
+			replaceSQLChar(switchData.OnlyId),
 			switchData.ProxyAddr,
 			switchData.ProcId,
 			nowTime,
@@ -154,7 +154,7 @@ func (this *clsDBHelper) UpdateAgentRecord(switchData *agentcomm.TagSwitchData) 
 		if agentRecord.ProcessId != switchData.ProcId {
 			sqlText += ",ProcessId='" + switchData.ProcId + "'"
 		}
-		sqlText += " WHERE OnlyId='" + ReplaceSQLChar(switchData.OnlyId) + "'"
+		sqlText += " WHERE OnlyId='" + replaceSQLChar(switchData.OnlyId) + "'"
 	}
 	if _, err = this.pSqliteDB.Exec(sqlText); err != nil {
 		this.logSQL(sqlText, err)
@@ -164,8 +164,8 @@ func (this *clsDBHelper) UpdateAgentRecord(switchData *agentcomm.TagSwitchData) 
 }
 
 //查询已经存在的Agent列表
-func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*TagAgentInfoRecord, error) {
-	var lstAgent = []*TagAgentInfoRecord{}
+func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*tagAgentInfoRecord, error) {
+	var lstAgent = []*tagAgentInfoRecord{}
 	var sqlText = `SELECT Id,OnlyId,ProxyAddr,Priority,ProcessId,IsBusy,IsActive,Disabled,GroupName,ReportTime,LastUseTime FROM AgentList `
 	if wheresql != "" {
 		sqlText += " WHERE " + wheresql
@@ -178,7 +178,7 @@ func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*TagAgentInfoRec
 	}
 	defer rows.Close()
 	for rows.Next() {
-		item := &TagAgentInfoRecord{}
+		item := &tagAgentInfoRecord{}
 		err = rows.Scan(&item.Id,
 			&item.OnlyId,
 			&item.ProxyAddr,
@@ -200,10 +200,10 @@ func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*TagAgentInfoRec
 }
 
 //查询一条记录
-func (this *clsDBHelper) getOneAgentRecordWithSQL(wheresql string) (*TagAgentInfoRecord, error) {
+func (this *clsDBHelper) getOneAgentRecordWithSQL(wheresql string) (*tagAgentInfoRecord, error) {
 	var sqlText = "SELECT Id,OnlyId,ProxyAddr,Priority,ProcessId,IsBusy,IsActive,ReportTime,LastUseTime FROM AgentList"
 	sqlText += " WHERE " + wheresql + " LIMIT 1"
-	var item = &TagAgentInfoRecord{}
+	var item = &tagAgentInfoRecord{}
 	var err = this.pSqliteDB.QueryRow(sqlText).Scan(
 		&item.Id,
 		&item.OnlyId,
@@ -219,20 +219,20 @@ func (this *clsDBHelper) getOneAgentRecordWithSQL(wheresql string) (*TagAgentInf
 }
 
 //根据uniqueid条件查询一条记录
-func (this *clsDBHelper) GetAgentRecordByOnlyId(onlyId string) (*TagAgentInfoRecord, error) {
-	var whereSql = fmt.Sprintf("OnlyId='%s'", ReplaceSQLChar(onlyId))
+func (this *clsDBHelper) GetAgentRecordByOnlyId(onlyId string) (*tagAgentInfoRecord, error) {
+	var whereSql = fmt.Sprintf("OnlyId='%s'", replaceSQLChar(onlyId))
 	return this.getOneAgentRecordWithSQL(whereSql)
 }
 
 //根据Id查询一条Agent记录
-func (this *clsDBHelper) GetAgentRecordById(Id int) (*TagAgentInfoRecord, error) {
+func (this *clsDBHelper) GetAgentRecordById(Id int) (*tagAgentInfoRecord, error) {
 	var whereSql = fmt.Sprintf("Id=%d", Id)
 	return this.getOneAgentRecordWithSQL(whereSql)
 }
 
 //设置某个onlyid的全为不存活状态,一般是因为agent断开了
 func (this *clsDBHelper) SetIsActiveByOnlyId(onlyId string, isActive int) {
-	sqlText := fmt.Sprintf("UPDATE AgentList SET IsActive=%d WHERE OnlyId='%s'", isActive, ReplaceSQLChar(onlyId))
+	sqlText := fmt.Sprintf("UPDATE AgentList SET IsActive=%d WHERE OnlyId='%s'", isActive, replaceSQLChar(onlyId))
 	this.Exec(sqlText)
 }
 

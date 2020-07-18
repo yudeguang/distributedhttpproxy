@@ -24,6 +24,8 @@ var nTcpListenPort = 8888
 var pLogger *common.BasicLogger = nil
 
 //启动函数
+//client_version 表示客户端版本与服务端版本相对应 如 version002，客户端的clientName中只要包含该字符就被认为匹配成功
+//portNum 表示服务端端口 如 8888
 func Server_start(client_version string, portNum int) {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	disableFastEditMode()
@@ -61,7 +63,7 @@ func runBeegoServer() {
 	beego.SetStaticPath("/js/", filepath.Join(viewPath, "js"))
 	beego.SetStaticPath("/css/", filepath.Join(viewPath, "css"))
 	//注册beego路由
-	beego.AutoRouter(&AgentController{})
+	beego.AutoRouter(&agentController{})
 	//beego.Router("/request/*",&ProxyController{},"*:Proxy")
 	//注册beego函数
 	beego.Run()

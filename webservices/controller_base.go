@@ -5,7 +5,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-type BaseController struct {
+type baseController struct {
 	beego.Controller
 }
 type tagResultStruct struct {
@@ -13,7 +13,7 @@ type tagResultStruct struct {
 	Data   interface{}
 }
 
-func (this *BaseController) replyERRJson(obj interface{}) {
+func (this *baseController) replyERRJson(obj interface{}) {
 	var o = &tagResultStruct{Status: 0, Data: obj}
 	data, err := json.MarshalIndent(o, "\t", "\t")
 	if err != nil {
@@ -22,7 +22,7 @@ func (this *BaseController) replyERRJson(obj interface{}) {
 		this.Ctx.WriteString(string(data))
 	}
 }
-func (this *BaseController) replyOKJson(obj interface{}) {
+func (this *baseController) replyOKJson(obj interface{}) {
 	var o = &tagResultStruct{Status: 1, Data: obj}
 	data, err := json.MarshalIndent(o, "\t", "\t")
 	if err != nil {
@@ -31,7 +31,7 @@ func (this *BaseController) replyOKJson(obj interface{}) {
 		this.Ctx.WriteString(string(data))
 	}
 }
-func (this *BaseController) replyJson(obj interface{}) {
+func (this *baseController) replyJson(obj interface{}) {
 	data, err := json.MarshalIndent(obj, "\t", "\t")
 	if err != nil {
 		this.Ctx.WriteString("ERR:" + err.Error())

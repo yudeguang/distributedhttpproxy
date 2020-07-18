@@ -34,6 +34,10 @@ var globalProcessId string
 var pLogger *common.BasicLogger = nil
 
 //开始工作主函数
+//clientName 表示客户名称，客户端口名字中需要包含版本信息，该版本信息对应服务端的client_version
+//如 clientName=version002_20200623 client_version可能就是version002
+//clientAddr 表示需要代理的客户端地址 如 127.0.0.1:8086
+//表示服务端地址 如 127.0.0.1:8888
 func Client_start(clientName, clientAddr, serverAddr string) {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	disableFastEditMode()
