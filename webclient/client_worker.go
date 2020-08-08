@@ -9,7 +9,8 @@ import (
 )
 
 type clsClientWorker struct {
-	conn net.Conn
+	conn     net.Conn
+	stopFlag bool
 }
 
 func (this *clsClientWorker) Start() {
@@ -17,6 +18,16 @@ func (this *clsClientWorker) Start() {
 		this.doLoopWork()
 		time.Sleep(2 * time.Second)
 	}
+}
+
+//暂停 该函数必须在Start后才有效
+func (this *clsClientWorker) Pause() {
+	this.stopFlag = true
+}
+
+//继续工作，该函数必须在Start后才有效
+func (this *clsClientWorker) Restart() {
+	this.stopFlag = false
 }
 func (this *clsClientWorker) doLoopWork() {
 	if this.conn != nil {
@@ -43,10 +54,12 @@ func (this *clsClientWorker) sendHeartThread(conn net.Conn, pwg *sync.WaitGroup)
 	defer pwg.Done()
 	defer conn.Close()
 	for {
-		var err = agentcomm.WritePackage(this.conn, agentcomm.CMD_CONNECT_MAIN, createSwitchData().ToString())
-		if err != nil {
-			pLogger.Log("发送心跳失败:", err)
-			return
+		if this.stopFlag == false {
+			var err = agentcomm.WritePackage(this.conn, agentcomm.CMD_CONNECT_MAIN, createSwitchData().ToString())
+			if err != nil {
+				pLogger.Log("发送心跳失败:", err)
+				return
+			}
 		}
 		time.Sleep(2 * time.Second)
 	}
