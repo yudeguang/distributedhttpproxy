@@ -38,7 +38,7 @@ var pLogger *common.BasicLogger = nil
 //如 clientName=version002_20200623 client_version可能就是version002
 //clientAddr 表示需要代理的客户端地址 如 127.0.0.1:8086
 //表示服务端地址 如 127.0.0.1:8888
-func Client_start(clientName, clientAddr, serverAddr string) {
+func ClientStart(clientName, clientAddr, serverAddr string) {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	disableFastEditMode()
 	//初始化一些参数保留起来
@@ -56,6 +56,16 @@ func Client_start(clientName, clientAddr, serverAddr string) {
 	pLogger.Log("服务器地址:", globalServerAddr)
 	//开始工作,连接
 	worker.Start()
+}
+
+//暂停 该函数必须在Start后才有效
+func ClientPause() {
+	worker.Pause()
+}
+
+//继续工作，该函数必须在Start后才有效
+func ClientRestart() {
+	worker.Restart()
 }
 
 //禁用快速编辑模式
