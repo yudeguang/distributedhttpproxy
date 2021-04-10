@@ -2,15 +2,16 @@ package webservices
 
 import (
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/yudeguang/distributedhttpproxy/agentcomm"
-	"github.com/yudeguang/distributedhttpproxy/common"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/yudeguang/distributedhttpproxy/agentcomm"
+	"github.com/yudeguang/distributedhttpproxy/common"
+	"github.com/yudeguang/oldbeego"
 )
 
 //服务的版本号,也做服务的标记，上报的Client中必须要包含这个才有效
@@ -51,21 +52,21 @@ func Server_start(client_version string, portNum int) {
 //启动Beego服务
 func runBeegoServer() {
 	pLogger.Log("启动WEB服务,端口:", nTcpListenPort+1)
-	beego.BConfig.Listen.HTTPPort = nTcpListenPort + 1
-	beego.BConfig.Listen.HTTPAddr = "127.0.0.1"
-	beego.BConfig.AppName = "17vinsoft"
-	beego.BConfig.RunMode = "dev"
-	beego.BConfig.CopyRequestBody = true
+	oldbeego.BConfig.Listen.HTTPPort = nTcpListenPort + 1
+	oldbeego.BConfig.Listen.HTTPAddr = "127.0.0.1"
+	oldbeego.BConfig.AppName = "17vinsoft"
+	oldbeego.BConfig.RunMode = "dev"
+	oldbeego.BConfig.CopyRequestBody = true
 	registBeegoFuncMap()
 	var viewPath = "./views"
-	beego.SetStaticPath("/", viewPath)
-	beego.SetStaticPath("/js/", filepath.Join(viewPath, "js"))
-	beego.SetStaticPath("/css/", filepath.Join(viewPath, "css"))
+	oldbeego.SetStaticPath("/", viewPath)
+	oldbeego.SetStaticPath("/js/", filepath.Join(viewPath, "js"))
+	oldbeego.SetStaticPath("/css/", filepath.Join(viewPath, "css"))
 	//注册beego路由
-	beego.AutoRouter(&agentController{})
-	//beego.Router("/request/*",&ProxyController{},"*:Proxy")
+	oldbeego.AutoRouter(&agentController{})
+	//oldbeego.Router("/request/*",&ProxyController{},"*:Proxy")
 	//注册beego函数
-	beego.Run()
+	oldbeego.Run()
 	pLogger.LogExit("WEB服务运行结束...")
 }
 

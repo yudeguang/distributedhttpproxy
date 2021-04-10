@@ -7,6 +7,7 @@ import (
 	"github.com/yudeguang/distributedhttpproxy/agentcomm"
 	"github.com/yudeguang/distributedhttpproxy/common"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -60,7 +61,12 @@ type tagAgentInfoRecord struct {
 //打开数据库连接
 func (this *clsDBHelper) DBOpen() error {
 	var err error
-	if false {
+	//ybs20210410,加入一个配置文件，如果有这个配置文件才使用文件数据库，否则使用内存数据库(这样每次启动就不会保留上次活跃的客户端)
+	useFileDB := false;
+	if _,err = os.Stat("./use_file_db.flag");err == nil{
+		useFileDB = true
+	}
+	if !useFileDB {
 		//用内存数据库
 		this.pSqliteDB, err = sql.Open("sqlite3", ":memory:")
 	} else {

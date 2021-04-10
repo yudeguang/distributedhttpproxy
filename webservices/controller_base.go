@@ -2,11 +2,12 @@ package webservices
 
 import (
 	"encoding/json"
-	"github.com/astaxie/beego"
+
+	"github.com/yudeguang/oldbeego"
 )
 
 type baseController struct {
-	beego.Controller
+	oldbeego.Controller
 }
 type tagResultStruct struct {
 	Status int
