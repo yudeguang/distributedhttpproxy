@@ -3,12 +3,12 @@ package webservices
 import (
 	"fmt"
 
-	"github.com/yudeguang/oldbeego"
+	beego "github.com/yudeguang/oldbeego"
 )
 
 func registBeegoFuncMap() {
-	oldbeego.AddFuncMap("IsEqual", isEqual)
-	oldbeego.AddFuncMap("NotEqual", notEqual)
+	beego.AddFuncMap("IsEqual", isEqual)
+	beego.AddFuncMap("NotEqual", notEqual)
 }
 
 //比较两个类型是否相等，全部转换为字符串比较
