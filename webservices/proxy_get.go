@@ -2,6 +2,7 @@ package webservices
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -18,7 +19,7 @@ var curInUseClientNames sync.Map
 func ProxyGet(URL string, groups ...string) (HTML string, ClientName string, err error) {
 	//当前使用的onlyid和proxyaddr存储到一个map里,退出的时候释放
 	var usedOnlyId string
-	var usedConn net.Conn
+	//var usedConn net.Conn
 	defer func() {
 		//为了安全起见,在这个地方就试图释放是否使用的状态
 		log.Println("释放代理:", usedOnlyId)
@@ -31,9 +32,9 @@ func ProxyGet(URL string, groups ...string) (HTML string, ClientName string, err
 		onlyId, conn, err := pProxyManager.GetPorxyTCPConnect(addr, groups)
 		usedOnlyId = onlyId
 		ClientName = onlyId
-		usedConn = conn
+		//usedConn = conn
 		if onlyId == "" {
-			pLogger.Log("没有找到合适的onlyId代理客户端:" + addr)
+			pLogger.Log("没有找到合适的onlyId代理客户端:" + addr+" ERR:"+fmt.Sprint(err))
 		} else {
 			if err == nil {
 				pLogger.Log(network + ":查找到onlyId=" + onlyId + " addr:" + addr + " Conn连接成功...")

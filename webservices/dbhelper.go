@@ -3,13 +3,14 @@ package webservices
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"strings"
+	"sync"
+	"time"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yudeguang/distributedhttpproxy/agentcomm"
 	"github.com/yudeguang/distributedhttpproxy/common"
-	"log"
-	"os"
-	"strings"
-	"time"
 )
 
 var pDBHelper = &clsDBHelper{}
@@ -22,6 +23,7 @@ func replaceSQLChar(sour string) string {
 
 //数据库辅助类
 type clsDBHelper struct {
+	mLocker 	sync.Mutex //用于执行数据库时的锁同步
 	pSqliteDB *sql.DB
 }
 
@@ -62,13 +64,13 @@ type tagAgentInfoRecord struct {
 func (this *clsDBHelper) DBOpen() error {
 	var err error
 	//ybs20210410,加入一个配置文件，如果有这个配置文件才使用文件数据库，否则使用内存数据库(这样每次启动就不会保留上次活跃的客户端)
-	useFileDB := false;
-	if _,err = os.Stat("./use_file_db.flag");err == nil{
+	useFileDB := false
+	if _, err = os.Stat("./use_file_db.flag"); err == nil {
 		useFileDB = true
 	}
 	if !useFileDB {
 		//用内存数据库
-		this.pSqliteDB, err = sql.Open("sqlite3", ":memory:")
+		this.pSqliteDB, err = sql.Open("sqlite3", "file::memory:?mode=memory&cache=shared&loc=auto")
 	} else {
 		this.pSqliteDB, err = sql.Open("sqlite3", "database.db3")
 	}
@@ -119,6 +121,8 @@ func (this *clsDBHelper) logSQL(sqlText string, err error) {
 
 //直接执行某个SQL语句
 func (this *clsDBHelper) Exec(sqlText string, args ...interface{}) error {
+	this.mLocker.Lock()
+	defer this.mLocker.Unlock()
 	_, err := this.pSqliteDB.Exec(sqlText, args...)
 	if err != nil {
 		this.logSQL(sqlText, err)
@@ -126,6 +130,8 @@ func (this *clsDBHelper) Exec(sqlText string, args ...interface{}) error {
 	return err
 }
 func (this *clsDBHelper) QueryRow(query string, args ...interface{}) *sql.Row {
+	this.mLocker.Lock()
+	defer this.mLocker.Unlock()
 	return this.pSqliteDB.QueryRow(query, args...)
 }
 
@@ -162,8 +168,7 @@ func (this *clsDBHelper) UpdateAgentRecord(switchData *agentcomm.TagSwitchData) 
 		}
 		sqlText += " WHERE OnlyId='" + replaceSQLChar(switchData.OnlyId) + "'"
 	}
-	if _, err = this.pSqliteDB.Exec(sqlText); err != nil {
-		this.logSQL(sqlText, err)
+	if err = this.Exec(sqlText); err != nil {
 		return err
 	}
 	return nil
@@ -177,7 +182,8 @@ func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*tagAgentInfoRec
 		sqlText += " WHERE " + wheresql
 	}
 	sqlText += " ORDER BY OnlyId"
-	log.Println(sqlText)
+	this.mLocker.Lock()
+	defer this.mLocker.Unlock()
 	rows, err := this.pSqliteDB.Query(sqlText)
 	if err != nil {
 		return lstAgent, err
@@ -207,6 +213,8 @@ func (this *clsDBHelper) GetAgentRecordList(wheresql string) ([]*tagAgentInfoRec
 
 //查询一条记录
 func (this *clsDBHelper) getOneAgentRecordWithSQL(wheresql string) (*tagAgentInfoRecord, error) {
+	this.mLocker.Lock()
+	defer this.mLocker.Unlock()
 	var sqlText = "SELECT Id,OnlyId,ProxyAddr,Priority,ProcessId,IsBusy,IsActive,ReportTime,LastUseTime FROM AgentList"
 	sqlText += " WHERE " + wheresql + " LIMIT 1"
 	var item = &tagAgentInfoRecord{}

@@ -49,21 +49,21 @@
 				<td>{{.ProxyAddr}}</td>
 				<td>
 					{{if IsEqual .Disabled 0}}
-						可用
+						<font color="red">启用</font>
 					{{else}}
-						<s style="color: grey">禁用</s>
+						禁用
 					{{end}}
-					&nbsp;
+					&nbsp;&nbsp;
 					{{if IsEqual .IsActive 1}}
-						存活
+						<font color="red">在线</font>
 					{{else}}
-						<s style="color: grey">存活</s>
+						离线
 					{{end}}
-					&nbsp;
+					&nbsp;&nbsp;
 					{{if IsEqual .IsBusy 1}}
-						<s style="color: grey">空闲</s>
+						使用中
 					{{else}}
-						空闲
+						<font color="red">空闲</font>
 					{{end}}
 				</td>
 				<td>{{.ProcessId}}</td>

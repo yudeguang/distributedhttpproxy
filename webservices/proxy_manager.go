@@ -60,19 +60,22 @@ func (this* clsProxyManager) GetAndLockOnlyId(proxyAddr string,lstExculde []stri
 		if err == sql.ErrNoRows{
 			return "",fmt.Errorf("no_valid_proxy_client")
 		}
-		return "",err;
+		return "",err
 	}
 	//找到了，将这个onlyid设置忙标记并更新调度时间
 	nowTime := time.Now().Format("2006-01-02 15:04:05.000")
 	pDBHelper.Exec("UPDATE AgentList SET IsBusy=1,LastUseTime=? WHERE OnlyId=?",nowTime,onlyId)
-	return onlyId,nil;
+	return onlyId,nil
 }
 //释放一个忙标记
 func (this* clsProxyManager) FreeOnlyId(onlyId string){
 	this.dbQueryFreeLocker.Lock()
 	defer this.dbQueryFreeLocker.Unlock();
-	if(onlyId != ""){
-		pDBHelper.Exec("UPDATE AgentList SET IsBusy=0 WHERE OnlyId=?",onlyId)
+	if onlyId != ""{
+		err := pDBHelper.Exec("UPDATE AgentList SET IsBusy=0 WHERE OnlyId=?",onlyId)
+		if err != nil{
+			pLogger.LogExit("释放OnlyId:"+onlyId+"失败ERR:"+err.Error()+" 退出程序")
+		}
 	}
 }
 //根据需要的代理地址，找到一个合适的Agent请求一个反向链接上来
@@ -84,23 +87,23 @@ func (this* clsProxyManager) GetPorxyTCPConnect(proxyAddr string,lstGroups []str
 		err = nil;
 		onlyId,err = this.GetAndLockOnlyId(proxyAddr,lstTryedOnlyId,lstGroups)
 		if err != nil{
-			return;
+			return
 		}
 		//这里确定了onlyid,给他发一个反向链接的请求
 		conn,err = this.tryCreateRevserveConnect(onlyId,proxyAddr);
 		if err != nil{//失败的话释放掉这个连接代理
 			this.FreeOnlyId(onlyId)
 			lstTryedOnlyId = append(lstTryedOnlyId,onlyId)
-			onlyId = "";
+			onlyId = ""
 			if strings.HasPrefix(err.Error(),"retry:"){
 				pLogger.Log("不可用OnlyId,触发尝试下一个,已尝试:",lstTryedOnlyId)
 				continue;
 			}
 		}
 		//这里就成功了或是不能重试的
-		break;
+		break
 	}
-	return;
+	return
 }
 //发送一个代理请求,看看是否能回应
 func (this* clsProxyManager) tryCreateRevserveConnect(onlyId string,proxyAddr string)(net.Conn,error){
